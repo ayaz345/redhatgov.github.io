@@ -47,14 +47,12 @@ class Event(object):
             self.end_date = self.start_date
 
     def __repr__(self):
-        return '<Event: {}>'.format(self.title)
+        return f'<Event: {self.title}>'
 
     @classmethod
     def from_sheets_row(cls, row):
         def row_value(row_data, index):
-            if index > len(row_data)-1:
-                return ''
-            return row_data[index]
+            return '' if index > len(row_data)-1 else row_data[index]
 
         return Event(
             start_date=row_value(row, 0),
@@ -160,7 +158,7 @@ def get_credentials():
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
         credentials = tools.run_flow(flow, store)
-        print('Storing credentials to ' + credential_path)
+        print(f'Storing credentials to {credential_path}')
     return credentials
 
 
@@ -199,11 +197,8 @@ def main():
         if len(event_file) < 45 or event_file[-3:] != '.md':
             continue  # Skip files that don't appear to be auto-generated
 
-        match = re.match(r'\d{8}-\S+-(\S+).md', event_file)
-        if not match:
-            # TODO: log mismatch
-            continue
-        event_files[match.group(1)] = event_file
+        if match := re.match(r'\d{8}-\S+-(\S+).md', event_file):
+            event_files[match[1]] = event_file
 
     for event_hash, event in events.iteritems():
         if event_hash in event_files:
